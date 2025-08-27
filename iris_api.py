@@ -52,12 +52,30 @@ def get_eventId_from_timeline_events(timeline):
     return eventsIDs
 
 
-add_event()
+def get_timesketch_events(filter):
+    url = f"{IRIS_API_URL}/case/timeline/advanced-filter?cid={IRIS_CASE_ID}&q={json.dumps(filter)}"
+    response = requests.get(url=url, headers=HEADERS, verify=False)
+    return response.text
 
-filter = {"tag":["timesketch_starred_events"]}
-events = get_timesketch_events(filter)
-events = json.loads(events)
+def get_eventId_from_timeline_events(timeline):
+    eventsIDs = []
+    for event in timeline:
+        eventsIDs.append(event['event_id'])
+    return eventsIDs
 
-eventsIDs = get_eventId_from_timeline_events(events['data']['timeline'])
-for eventID in eventsIDs:
-    delete_event(eventID)
+
+if __name__ == "__main__":
+
+    # Get all old timesketch starred events stored in IRIS Timeline
+    filter = {"tag":["timesketch_starred_events"]}
+    events = get_timesketch_events(filter)
+    events = json.loads(events)
+
+    # Remove all old timesketch starred events stored in IRIS Timeline to prevent dupplicated events
+    eventsIDs = get_eventId_from_timeline_events(events['data']['timeline'])
+    for eventID in eventsIDs:
+        delete_event(eventID)
+
+    # Add events from Timesketch with Starred tags
+    add_event()
+
