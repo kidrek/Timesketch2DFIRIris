@@ -6,7 +6,6 @@ IRIS_CASE_ID = 1
 IRIS_API_URL = "https://127.0.0.1:7443/"
 IRIS_API_TOKEN = ""
 
-
 HEADERS = {
     "Authorization": f"Bearer {IRIS_API_TOKEN}",
     "Content-Type": "application/json",
@@ -69,8 +68,3 @@ if __name__ == "__main__":
 
     # Add events from Timesketch with Starred tags
     add_event()
-
-
-    # Add events from Timesketch with Starred tags
-    add_event()
-
