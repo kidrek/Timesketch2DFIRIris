@@ -35,14 +35,29 @@ def add_event():
     response = requests.post(url, json=data, headers=HEADERS, verify=False)
     print(response.text)
 
-
-## Error in filter
-def get_timesketch_events():
-    filter = "{tag:[timesketch_starred_events]}"
-    url = f"{IRIS_API_URL}/case/timeline/advanced-filter?cid={IRIS_CASE_ID}&q={filter}"
-    response = requests.get(url=url, headers=HEADERS, verify=False)
+def delete_event(eventID):
+    url = f"{IRIS_API_URL}/case/timeline/events/delete/{eventID}?cid={IRIS_CASE_ID}"
+    response = requests.post(url, headers=HEADERS, verify=False)
     print(response.text)
 
+def get_timesketch_events(filter):
+    url = f"{IRIS_API_URL}/case/timeline/advanced-filter?cid={IRIS_CASE_ID}&q={json.dumps(filter)}"
+    response = requests.get(url=url, headers=HEADERS, verify=False)
+    return response.text
 
-#add_event()
-get_timesketch_events()
+def get_eventId_from_timeline_events(timeline):
+    eventsIDs = []
+    for event in timeline:
+        eventsIDs.append(event['event_id'])
+    return eventsIDs
+
+
+add_event()
+
+filter = {"tag":["timesketch_starred_events"]}
+events = get_timesketch_events(filter)
+events = json.loads(events)
+
+eventsIDs = get_eventId_from_timeline_events(events['data']['timeline'])
+for eventID in eventsIDs:
+    delete_event(eventID)
