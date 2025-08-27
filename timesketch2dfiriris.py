@@ -1,7 +1,7 @@
 from datetime import datetime
 import json
 import requests
-import dfiriris_api
+import iris_api
 
 
 # Configuration
@@ -123,13 +123,13 @@ if __name__ == "__main__":
     ## DFIR IRIS
     # Get all old timesketch starred events stored in IRIS Timeline
     filter = {"tag":["timesketch_starred_events"]}
-    events = dfiriris_api.get_timesketch_events(filter)
+    events = iris_api.get_timesketch_events(filter)
     events = json.loads(events)
 
     # Remove all old timesketch starred events stored in IRIS Timeline to prevent dupplicated events
-    eventsIDs = dfiriris_api.get_eventId_from_timeline_events(events['data']['timeline'])
+    eventsIDs = iris_api.get_eventId_from_timeline_events(events['data']['timeline'])
     for eventID in eventsIDs:
-        dfiriris_api.delete_event(eventID)
+        iris_api.delete_event(eventID)
 
 
     ## TIMESKETCH
@@ -153,9 +153,5 @@ if __name__ == "__main__":
         try: title = f"[{event['_source']['data_type']}] {event['_source']['message'][:40]}..." 
         except : title = f"{event['_source']['message'][:40]}..."
 
-        dfiriris_api.add_event(formatted_date, title, message, event['_source']['message'], [])
+        iris_api.add_event(formatted_date, title, message, event['_source']['message'], [])
         #print(f"{event['_source']['datetime']}:  {event['_source']['message']} / Comment: {event['_source']['comment']}\n")
-
-    for event in starredEvents['objects']:
-        #print(f"{event} \n")
-        print(f"{event['_source']['datetime']}:  {event['_source']['message']} / Comment: {event['_source']['comment']}\n")
