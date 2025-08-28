@@ -2,69 +2,58 @@ import requests
 from datetime import datetime
 import json
 
-IRIS_CASE_ID = 1
-IRIS_API_URL = "https://127.0.0.1:7443/"
-IRIS_API_TOKEN = ""
 
-HEADERS = {
-    "Authorization": f"Bearer {IRIS_API_TOKEN}",
-    "Content-Type": "application/json",
-}
+class irisAPI:
+    def __init__(self, url, token):
+        self.url = url
+        self.token = token
+        self.session = requests.Session()
 
-def delete_event(eventID):
-    url = f"{IRIS_API_URL}/case/timeline/events/delete/{eventID}?cid={IRIS_CASE_ID}"
-    response = requests.post(url, headers=HEADERS, verify=False)
-    print(response.text)
+        self.headers = {
+            "Authorization": f"Bearer {self.token}",
+            "Content-Type": "application/json",
+        }
 
 
-def add_event(date, title = 'Event title', message = '', raw_message = '', assets = []):
-    url = f"{IRIS_API_URL}/case/timeline/events/add?cid={IRIS_CASE_ID}"
-    data = {
-    "event_title": title,
-    "event_raw": raw_message,
-    "event_source": "Timesketch",
-    "event_assets": assets,
-    "event_iocs": [],
-    "event_category_id": "5",
-    "event_in_summary": True,
-    "event_in_graph": True,
-    "event_color": "#1572E899",
-    "event_date": date,
-    "event_sync_iocs_assets": True,
-    "event_tags": "timesketch_starred_events",
-    "event_tz": "+00:00",
-    "event_content": message,
-    "parent_event_id": None,
-    "custom_attributes": {}
-    }
-
-    response = requests.post(url, json=data, headers=HEADERS, verify=False)
-    print(response.text)
+    def delete_event(self, caseID, eventID):
+        url = f"{self.url}/case/timeline/events/delete/{eventID}?cid={caseID}"
+        response = self.session.post(url, headers=self.headers, verify=False)
+        print(response.text)
 
 
-def get_timesketch_events(filter):
-    url = f"{IRIS_API_URL}/case/timeline/advanced-filter?cid={IRIS_CASE_ID}&q={json.dumps(filter)}"
-    response = requests.get(url=url, headers=HEADERS, verify=False)
-    return response.text
+    def add_event(self, caseID, date, title = 'Event title', message = '', raw_message = '', assets = []):
+        url = f"{self.url}/case/timeline/events/add?cid={caseID}"
+        data = {
+        "event_title": title,
+        "event_raw": raw_message,
+        "event_source": "Timesketch",
+        "event_assets": assets,
+        "event_iocs": [],
+        "event_category_id": "5",
+        "event_in_summary": True,
+        "event_in_graph": True,
+        "event_color": "#1572E899",
+        "event_date": date,
+        "event_sync_iocs_assets": True,
+        "event_tags": "timesketch_starred_events",
+        "event_tz": "+00:00",
+        "event_content": message,
+        "parent_event_id": None,
+        "custom_attributes": {}
+        }
 
-def get_eventId_from_timeline_events(timeline):
-    eventsIDs = []
-    for event in timeline:
-        eventsIDs.append(event['event_id'])
-    return eventsIDs
+        response = self.session.post(url, json=data, headers=self.headers, verify=False)
+        print(response.text)
 
 
-if __name__ == "__main__":
+    def get_timesketch_events(self, caseID, filter):
+        url = f"{self.url}/case/timeline/advanced-filter?cid={caseID}&q={json.dumps(filter)}"
+        response = self.session.get(url=url, headers=self.headers, verify=False)
+        return response.text
 
-    # Get all old timesketch starred events stored in IRIS Timeline
-    filter = {"tag":["timesketch_starred_events"]}
-    events = get_timesketch_events(filter)
-    events = json.loads(events)
+    def get_eventId_from_timeline_events(self, timeline):
+        eventsIDs = []
+        for event in timeline:
+            eventsIDs.append(event['event_id'])
+        return eventsIDs
 
-    # Remove all old timesketch starred events stored in IRIS Timeline to prevent dupplicated events
-    eventsIDs = get_eventId_from_timeline_events(events['data']['timeline'])
-    for eventID in eventsIDs:
-        delete_event(eventID)
-
-    # Add events from Timesketch with Starred tags
-    add_event()
